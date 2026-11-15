@@ -17,11 +17,21 @@ A full-stack QA Management System currently under development. The backend provi
 - Safe startup migration for the older projects table; existing records are preserved.
 - Interactive API documentation through Swagger UI and ReDoc.
 
+## Why GitHub Shows JavaScript
+
+This is a **full-stack project**, so it uses more than one programming language:
+
+- **Python** powers the backend: FastAPI, authentication, database models, and REST API endpoints are implemented in Python inside `backend/`.
+- **JavaScript** powers the frontend: the browser interface is built with React and Vite inside `frontend/`. React components use the `.jsx` extension, while frontend configuration and API helper files use `.js`.
+
+GitHub's language summary detects languages from files across the entire repository. It may therefore show JavaScript even though the backend is written in Python. This is expected and is not, by itself, a project error. The two parts communicate through HTTP API requests.
+
 ## Technology Stack
 
 | Category | Technology |
 |---|---|
-| Language | Python |
+| Backend language | Python 3 |
+| Frontend language | JavaScript (ES modules / JSX) |
 | Backend | FastAPI |
 | Database | SQLite |
 | ORM | SQLAlchemy |
