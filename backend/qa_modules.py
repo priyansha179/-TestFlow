@@ -352,3 +352,26 @@ def delete_defect(defect_id: int, db: Session = Depends(get_db), user: models.Us
 def project_activity(project_id: int, db: Session = Depends(get_db), user: models.User = Depends(current_user)):
     owned_project(project_id, db, user)
     return db.query(models.AuditLog).filter(models.AuditLog.project_id == project_id).order_by(models.AuditLog.created_at.desc()).limit(100).all()
+
+
+@router.get("/notifications")
+def notifications(db: Session = Depends(get_db), user: models.User = Depends(current_user)):
+    """Return recent QA activity for the authenticated user's projects."""
+    rows = db.query(models.AuditLog, models.Project.name).join(
+        models.Project, models.AuditLog.project_id == models.Project.id
+    ).filter(models.Project.owner_id == user.id).order_by(
+        models.AuditLog.created_at.desc()
+    ).limit(50).all()
+    return [
+        {
+            "id": log.id,
+            "project_id": log.project_id,
+            "project_name": project_name,
+            "action": log.action,
+            "entity_type": log.entity_type,
+            "entity_id": log.entity_id,
+            "details": log.details,
+            "created_at": log.created_at,
+        }
+        for log, project_name in rows
+    ]
