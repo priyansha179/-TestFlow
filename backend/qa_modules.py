@@ -228,6 +228,7 @@ def update_plan(plan_id: int, payload: PlanUpdate, db: Session = Depends(get_db)
 def delete_plan(plan_id: int, db: Session = Depends(get_db), user: models.User = Depends(current_user)):
     plan = owned_plan(plan_id, db, user)
     audit(db, plan.project_id, user.id, "deleted", "test_plan", plan.id, plan.name)
+    db.query(models.TestRun).filter(models.TestRun.plan_id == plan.id).update({models.TestRun.plan_id: None}, synchronize_session=False)
     db.query(models.TestPlanCase).filter(models.TestPlanCase.plan_id == plan.id).delete()
     db.delete(plan); db.commit()
     return {"message": "Test plan deleted"}
