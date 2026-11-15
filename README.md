@@ -43,7 +43,7 @@ A full-stack QA workspace for organizing software testing from planning through 
 ### Reports and activity
 - Dashboard totals for projects, test cases, plans, runs and defects.
 - Execution outcome counts and defect severity breakdown.
-- Project activity history for plans, runs, results and defects.
+- Project activity history and a notification feed for plans, runs, results and defects.
 
 ### Engineering quality
 - Backend API integration tests using pytest and FastAPI TestClient.
@@ -245,13 +245,14 @@ Use `docs/TESTING_CHECKLIST.md` as the manual regression checklist. Import `post
 - [x] Test plan management and test-case selection.
 - [x] Test run creation and result recording.
 - [x] Defect tracking with severity, priority and status.
-- [x] Dashboard metrics and project activity history.
+- [x] Dashboard metrics, project activity history and notifications.
 - [x] Backend integration tests and GitHub Actions workflow.
 - [x] Docker-based local deployment configuration.
+- [x] Postman API regression collection and Playwright browser smoke checks.
 - [x] Browser smoke automation with Playwright (login, registration and protected-route checks).
 - [ ] Team invitations, shared project membership and granular role permissions.
 - [ ] File attachments for defect evidence.
-- [ ] Email/in-app notification preferences.
+- [ ] Email notifications and configurable notification preferences.
 - [ ] Cloud deployment with managed PostgreSQL, HTTPS and backups.
 - [ ] Production security review and database migrations.
 
