@@ -47,7 +47,7 @@ A full-stack QA workspace for organizing software testing from planning through 
 
 ### Engineering quality
 - Backend API integration tests using pytest and FastAPI TestClient.
-- GitHub Actions workflow for backend tests and frontend production build.
+- GitHub Actions workflow for backend tests, frontend production build and Playwright browser smoke tests.
 - Dockerfiles and Docker Compose for local demonstration.
 - Configurable database URL (SQLite locally; PostgreSQL can be configured).
 - Manual regression checklist in `docs/TESTING_CHECKLIST.md`.
@@ -63,7 +63,7 @@ A full-stack QA workspace for organizing software testing from planning through 
 | Authentication | JWT, python-jose, bcrypt via Passlib |
 | API documentation | Swagger UI and ReDoc |
 | Testing | pytest, FastAPI TestClient, httpx |
-| UI automation foundation | Playwright can be added for browser end-to-end coverage |
+| Browser automation | Playwright smoke tests for registration, login and protected routes |
 | CI | GitHub Actions |
 | Containers | Docker and Docker Compose |
 
@@ -176,7 +176,7 @@ cd backend
 pytest -q
 ```
 
-The tests cover authentication, protected routes, a full plan-to-run-to-defect workflow, dashboard aggregation and cross-user project isolation.
+The tests cover authentication, protected routes, a full plan-to-run-to-defect workflow, dashboard aggregation, activity/notification records and cross-user project isolation.
 
 ### 5. Run with Docker
 
@@ -212,6 +212,7 @@ All endpoints except health, registration and login require `Authorization: Bear
 | GET/POST | `/projects/{project_id}/defects` | List/create defects |
 | PUT/DELETE | `/defects/{defect_id}` | Update/delete defect |
 | GET | `/projects/{project_id}/activity` | Project audit activity |
+| GET | `/notifications` | Current user's QA activity notifications |
 
 Open Swagger UI to inspect request schemas and try the APIs interactively.
 
