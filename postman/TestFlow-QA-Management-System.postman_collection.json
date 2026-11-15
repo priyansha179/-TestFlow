@@ -1,0 +1,328 @@
+{
+  "info": {
+    "_postman_id": "f3d4a9c8-4f3c-4f4f-9c6e-qa-management-system",
+    "name": "TestFlow QA Management System API",
+    "description": "Starter API regression collection for the QA Management System. Set baseUrl, email and password before running. Requests are ordered so IDs and JWT are captured automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "email",
+      "value": "qa-demo@example.com"
+    },
+    {
+      "key": "password",
+      "value": "ChangeThisPass123"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "projectId",
+      "value": ""
+    },
+    {
+      "key": "testCaseId",
+      "value": ""
+    },
+    {
+      "key": "planId",
+      "value": ""
+    },
+    {
+      "key": "runId",
+      "value": ""
+    },
+    {
+      "key": "defectId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('API is healthy', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{email}}\",\"password\":\"{{password}}\"}"
+        },
+        "url": "{{baseUrl}}/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Registration succeeds or account already exists', () => pm.expect([201,400]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{email}}\",\"password\":\"{{password}}\"}"
+        },
+        "url": "{{baseUrl}}/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Login returns access token', () => { pm.response.to.have.status(200); const body = pm.response.json(); pm.expect(body.access_token).to.be.a('string'); pm.collectionVariables.set('token', body.access_token); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create project",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Postman QA Demo\",\"description\":\"API regression collection\",\"status\":\"Active\"}"
+        },
+        "url": "{{baseUrl}}/projects"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Project created', () => { pm.response.to.have.status(201); pm.collectionVariables.set('projectId', pm.response.json().id); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create test case",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Valid login works\",\"description\":\"Check successful login\",\"preconditions\":\"An active user exists\",\"steps\":\"Open login; enter valid credentials; submit\",\"expected_result\":\"User reaches dashboard\",\"priority\":\"High\",\"status\":\"Ready\"}"
+        },
+        "url": "{{baseUrl}}/projects/{{projectId}}/test-cases"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Test case created', () => { pm.response.to.have.status(201); pm.collectionVariables.set('testCaseId', pm.response.json().id); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create test plan",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Smoke plan\",\"objective\":\"Verify critical user flows\",\"scope\":\"Authentication\",\"status\":\"Approved\",\"test_case_ids\":[{{testCaseId}}]}"
+        },
+        "url": "{{baseUrl}}/projects/{{projectId}}/test-plans"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Test plan created', () => { pm.response.to.have.status(201); pm.collectionVariables.set('planId', pm.response.json().id); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create test run",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Smoke run 1\",\"plan_id\":{{planId}},\"environment\":\"Staging\"}"
+        },
+        "url": "{{baseUrl}}/projects/{{projectId}}/test-runs"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Run created with planned test cases', () => { pm.response.to.have.status(201); pm.collectionVariables.set('runId', pm.response.json().id); pm.expect(pm.response.json().total).to.eql(1); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Record failed result",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"test_case_id\":{{testCaseId}},\"status\":\"Failed\",\"actual_result\":\"Example failure from Postman\",\"notes\":\"Demonstration record\"}"
+        },
+        "url": "{{baseUrl}}/test-runs/{{runId}}/results"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Result recorded', () => { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql('Failed'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create defect",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Example login defect\",\"description\":\"Demonstration defect created by collection\",\"test_case_id\":{{testCaseId}},\"test_run_id\":{{runId}},\"steps_to_reproduce\":\"Open login and submit valid credentials\",\"expected_result\":\"Dashboard is displayed\",\"actual_result\":\"Error message is displayed\",\"severity\":\"High\",\"priority\":\"High\",\"status\":\"Open\"}"
+        },
+        "url": "{{baseUrl}}/projects/{{projectId}}/defects"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Defect created', () => { pm.response.to.have.status(201); pm.collectionVariables.set('defectId', pm.response.json().id); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard summary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/dashboard/summary"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Summary contains QA metrics', () => { pm.response.to.have.status(200); const body = pm.response.json(); pm.expect(body).to.have.property('projects'); pm.expect(body).to.have.property('defects'); pm.expect(body).to.have.property('results'); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
