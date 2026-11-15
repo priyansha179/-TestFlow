@@ -284,6 +284,4 @@ Users can view, update, or delete only projects they own. Requests for projects 
 - [ ] Automated API and end-to-end tests.
 - [ ] Deployment.
 
-## Project Status
 
-**In Progress** — Backend authentication, project CRUD, and the first React frontend are implemented. Test case management is implemented. Test execution, defect tracking, automated tests, and deployment remain planned.
