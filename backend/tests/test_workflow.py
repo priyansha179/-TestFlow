@@ -106,6 +106,9 @@ def test_complete_qa_workflow(client):
     activity = client.get(f"/projects/{project_id}/activity", headers=headers)
     assert activity.status_code == 200
     assert len(activity.json()) >= 4
+    notifications = client.get("/notifications", headers=headers)
+    assert notifications.status_code == 200
+    assert notifications.json()[0]["project_name"] == "Demo shop"
 
 
 def test_users_cannot_access_other_users_projects(client):
