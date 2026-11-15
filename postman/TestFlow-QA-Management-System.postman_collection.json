@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "f3d4a9c8-4f3c-4f4f-9c6e-qa-management-system",
+    "_postman_id": "f3d4a9c8-4f3c-4f4f-9c6e-123456789abc",
     "name": "TestFlow QA Management System API",
     "description": "Starter API regression collection for the QA Management System. Set baseUrl, email and password before running. Requests are ordered so IDs and JWT are captured automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
