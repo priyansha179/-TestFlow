@@ -4,8 +4,9 @@ services:
     environment:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in your .env file}
       FRONTEND_ORIGINS: http://localhost:8080
+      DATABASE_URL: sqlite:////data/qa_system.db
     volumes:
-      - qa_data:/app
+      - qa_data:/data
     ports:
       - "8000:8000"
     restart: unless-stopped
