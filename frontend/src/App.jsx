@@ -3,6 +3,7 @@ import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } fr
 import { Activity, ArrowDownUp, ArrowRight, Bell, Check, CheckCircle2, ChevronDown, CircleHelp, ClipboardCheck, Clock3, FolderKanban, LayoutDashboard, ListChecks, LogOut, Menu, Plus, Search, Settings2, ShieldCheck, Sparkles, Trash2, X } from "lucide-react";
 import { api } from "./api";
 import WorkflowPage from "./WorkflowPage";
+import NotificationsPage from "./NotificationsPage";
 import { useAuth } from "./AuthContext";
 
 function Brand({ compact = false }) {
@@ -61,7 +62,7 @@ function AppShell({ children }) {
       <div className="sidebar-bottom"><div className="help-card"><CircleHelp size={18}/><b>Need a hand?</b><p>Your QA workspace is growing. More tools are on the way.</p></div><button className="profile-row" onClick={()=>{logout();navigate("/login");}}><span className="avatar">{initials}</span><span className="profile-text"><b>{session?.email}</b><small>{session?.role || "Tester"}</small></span><LogOut size={16}/></button></div>
     </aside>
     {mobileOpen && <button className="scrim" onClick={()=>setMobileOpen(false)} aria-label="Close menu"/>}
-    <main className="main-area"><header className="topbar"><button className="icon-btn menu-toggle" onClick={()=>setMobileOpen(true)}><Menu size={20}/></button><div className="breadcrumb">Workspace <span>/</span> <b>{location.pathname.startsWith("/projects/") ? "Test cases" : "Overview"}</b></div><div className="top-actions"><span className="top-status"><span className="online-dot"/> All systems operational</span><button className="icon-btn" title="Notifications"><Bell size={18}/></button><span className="avatar avatar-small">{initials}</span></div></header>{children}</main>
+    <main className="main-area"><header className="topbar"><button className="icon-btn menu-toggle" onClick={()=>setMobileOpen(true)}><Menu size={20}/></button><div className="breadcrumb">Workspace <span>/</span> <b>{location.pathname.startsWith("/projects/") ? "Test cases" : "Overview"}</b></div><div className="top-actions"><span className="top-status"><span className="online-dot"/> All systems operational</span><button className="icon-btn" title="Notifications" onClick={()=>navigate("/notifications")}><Bell size={18}/></button><span className="avatar avatar-small">{initials}</span></div></header>{children}</main>
   </div>;
 }
 
@@ -191,6 +192,7 @@ export default function App() {
     <Route path="/login" element={<AuthPage mode="login"/>}/>
     <Route path="/register" element={<AuthPage mode="register"/>}/>
     <Route path="/dashboard" element={<Protected><AppShell><Dashboard/></AppShell></Protected>}/>
+    <Route path="/notifications" element={<Protected><AppShell><NotificationsPage/></AppShell></Protected>}/>
     <Route path="/projects/:projectId/test-cases" element={<Protected><AppShell><TestCasesPage/></AppShell></Protected>}/>
     <Route path="/projects/:projectId/workflow" element={<Protected><AppShell><WorkflowPage/></AppShell></Protected>}/>
     <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
