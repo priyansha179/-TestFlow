@@ -236,7 +236,7 @@ Recommended demonstration:
 6. Review the dashboard and activity history.
 7. Run the automated tests and include screenshots plus a test summary in your portfolio.
 
-Use `docs/TESTING_CHECKLIST.md` as the manual regression checklist.
+Use `docs/TESTING_CHECKLIST.md` as the manual regression checklist. Import `postman/TestFlow-QA-Management-System.postman_collection.json` into Postman, set its collection variables, then run the requests in order for an API workflow smoke test. Browser smoke tests are in `frontend/e2e/auth.spec.js` and run with `npm run test:e2e`.
 
 ## Roadmap
 
@@ -248,7 +248,7 @@ Use `docs/TESTING_CHECKLIST.md` as the manual regression checklist.
 - [x] Dashboard metrics and project activity history.
 - [x] Backend integration tests and GitHub Actions workflow.
 - [x] Docker-based local deployment configuration.
-- [ ] Browser end-to-end automation with Playwright.
+- [x] Browser smoke automation with Playwright (login, registration and protected-route checks).
 - [ ] Team invitations, shared project membership and granular role permissions.
 - [ ] File attachments for defect evidence.
 - [ ] Email/in-app notification preferences.
