@@ -293,6 +293,7 @@ def record_result(run_id: int, payload: ResultIn, db: Session = Depends(get_db),
     result.actual_result = payload.actual_result
     result.notes = payload.notes
     result.executed_at = datetime.now(timezone.utc)
+    db.flush()
     if run.status != "In Progress":
         run.status = "In Progress"; run.completed_at = None
     audit(db, run.project_id, user.id, "result_recorded", "test_result", result.id, f"{case.title}: {payload.status}")
