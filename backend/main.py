@@ -484,6 +484,6 @@ def delete_test_case(
     return {"message": "Test case deleted successfully"}
 
 
-// Extended QA workflow modules: plans, execution, defects, reports and audit history.
+# Extended QA workflow modules: plans, execution, defects, reports and audit history.
 from qa_modules import router as qa_router
 app.include_router(qa_router)
