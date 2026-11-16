@@ -2,7 +2,7 @@
 
 A full-stack QA workspace for organizing software testing from planning through execution and defect tracking. Built as a learning and portfolio project with a React frontend and a FastAPI backend.
 
-> Project status: active development. The core QA workflow is implemented on the `feature/complete-qa-workflow` branch. Automated checks are included; review the GitHub Actions result before treating a change as verified.
+> Project status: core portfolio release completed and merged into `main`. The backend test suite, frontend production build and Playwright browser smoke tests passed in GitHub Actions. This is a learning/portfolio application, not a production-audited SaaS.
 
 ## Features
 
@@ -239,7 +239,13 @@ Recommended demonstration:
 
 Use `docs/TESTING_CHECKLIST.md` as the manual regression checklist. Import `postman/TestFlow-QA-Management-System.postman_collection.json` into Postman, set its collection variables, then run the requests in order for an API workflow smoke test. Browser smoke tests are in `frontend/e2e/auth.spec.js` and run with `npm run test:e2e`.
 
-## Roadmap
+## Release status
+
+The core portfolio workflow is implemented and tested. The GitHub Actions workflow runs backend integration tests, builds the frontend and executes Playwright browser smoke tests.
+
+### Optional production enhancements
+
+These items are intentionally outside the core portfolio release and should be completed before using the application as a shared, internet-facing production service.
 
 - [x] Authentication and per-user project isolation.
 - [x] Project and test-case CRUD.
