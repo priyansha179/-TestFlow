@@ -346,6 +346,17 @@ def delete_project(
             detail="Project not found",
         )
 
+    db.query(models.Defect).filter(
+        models.Defect.project_id == project.id
+    ).delete(synchronize_session=False)
+    test_case_ids = [
+        row[0] for row in db.query(models.TestCase.id)
+        .filter(models.TestCase.project_id == project.id).all()
+    ]
+    if test_case_ids:
+        db.query(models.TestExecution).filter(
+            models.TestExecution.test_case_id.in_(test_case_ids)
+        ).delete(synchronize_session=False)
     db.query(models.TestCase).filter(
         models.TestCase.project_id == project.id
     ).delete(synchronize_session=False)
@@ -470,6 +481,239 @@ def delete_test_case(
     current_user: models.User = Depends(get_authenticated_user),
 ):
     test_case = get_owned_test_case(test_case_id, db, current_user)
+    execution_ids = [
+        row[0] for row in db.query(models.TestExecution.id)
+        .filter(models.TestExecution.test_case_id == test_case_id).all()
+    ]
+    if execution_ids:
+        db.query(models.Defect).filter(
+            models.Defect.test_execution_id.in_(execution_ids)
+        ).update({"test_execution_id": None}, synchronize_session=False)
+        db.query(models.TestExecution).filter(
+            models.TestExecution.id.in_(execution_ids)
+        ).delete(synchronize_session=False)
     db.delete(test_case)
     db.commit()
     return {"message": "Test case deleted successfully"}
+
+# Test execution and defect management
+class TestExecutionCreate(BaseModel):
+    status: Literal["Pass", "Fail", "Blocked"]
+    actual_result: str | None = None
+    notes: str | None = None
+
+
+class TestExecutionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    test_case_id: int
+    status: str
+    actual_result: str | None
+    notes: str | None
+    executed_by: int
+    executed_at: datetime
+
+
+class DefectCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    description: str = Field(min_length=1)
+    steps_to_reproduce: str = Field(min_length=1)
+    severity: Literal["Low", "Medium", "High", "Critical"] = "Medium"
+    priority: Literal["Low", "Medium", "High", "Critical"] = "Medium"
+    test_execution_id: int | None = None
+
+
+class DefectUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = Field(default=None, min_length=1)
+    steps_to_reproduce: str | None = Field(default=None, min_length=1)
+    severity: Literal["Low", "Medium", "High", "Critical"] | None = None
+    priority: Literal["Low", "Medium", "High", "Critical"] | None = None
+    status: Literal["Open", "In Progress", "Resolved", "Closed"] | None = None
+
+
+class DefectResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    project_id: int
+    test_execution_id: int | None
+    title: str
+    description: str
+    steps_to_reproduce: str
+    severity: str
+    priority: str
+    status: str
+    created_by: int
+    created_at: datetime
+    updated_at: datetime
+
+
+def get_owned_defect(defect_id: int, db: Session, current_user: models.User):
+    defect = (
+        db.query(models.Defect)
+        .join(models.Project, models.Defect.project_id == models.Project.id)
+        .filter(
+            models.Defect.id == defect_id,
+            models.Project.owner_id == current_user.id,
+        )
+        .first()
+    )
+    if defect is None:
+        raise HTTPException(status_code=404, detail="Defect not found")
+    return defect
+
+
+@app.post(
+    "/test-cases/{test_case_id}/executions",
+    response_model=TestExecutionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_test_execution(
+    test_case_id: int,
+    execution_data: TestExecutionCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_authenticated_user),
+):
+    test_case = get_owned_test_case(test_case_id, db, current_user)
+    execution = models.TestExecution(
+        test_case_id=test_case.id,
+        status=execution_data.status,
+        actual_result=execution_data.actual_result,
+        notes=execution_data.notes,
+        executed_by=current_user.id,
+    )
+    db.add(execution)
+    db.commit()
+    db.refresh(execution)
+    return execution
+
+
+@app.get(
+    "/test-cases/{test_case_id}/executions",
+    response_model=list[TestExecutionResponse],
+)
+def list_test_executions(
+    test_case_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_authenticated_user),
+):
+    get_owned_test_case(test_case_id, db, current_user)
+    return (
+        db.query(models.TestExecution)
+        .filter(models.TestExecution.test_case_id == test_case_id)
+        .order_by(models.TestExecution.executed_at.desc())
+        .all()
+    )
+
+
+@app.get(
+    "/projects/{project_id}/executions",
+    response_model=list[TestExecutionResponse],
+)
+def list_project_executions(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_authenticated_user),
+):
+    get_owned_project(project_id, db, current_user)
+    return (
+        db.query(models.TestExecution)
+        .join(models.TestCase, models.TestExecution.test_case_id == models.TestCase.id)
+        .filter(models.TestCase.project_id == project_id)
+        .order_by(models.TestExecution.executed_at.desc())
+        .all()
+    )
+
+
+@app.post(
+    "/projects/{project_id}/defects",
+    response_model=DefectResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_defect(
+    project_id: int,
+    defect_data: DefectCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_authenticated_user),
+):
+    get_owned_project(project_id, db, current_user)
+    if defect_data.test_execution_id is not None:
+        execution = (
+            db.query(models.TestExecution)
+            .join(models.TestCase, models.TestExecution.test_case_id == models.TestCase.id)
+            .filter(
+                models.TestExecution.id == defect_data.test_execution_id,
+                models.TestCase.project_id == project_id,
+            )
+            .first()
+        )
+        if execution is None:
+            raise HTTPException(status_code=404, detail="Test execution not found in this project")
+        if execution.status != "Fail":
+            raise HTTPException(status_code=400, detail="A defect can only be linked to a failed execution")
+    defect = models.Defect(
+        project_id=project_id,
+        test_execution_id=defect_data.test_execution_id,
+        title=defect_data.title,
+        description=defect_data.description,
+        steps_to_reproduce=defect_data.steps_to_reproduce,
+        severity=defect_data.severity,
+        priority=defect_data.priority,
+        created_by=current_user.id,
+    )
+    db.add(defect)
+    db.commit()
+    db.refresh(defect)
+    return defect
+
+
+@app.get("/projects/{project_id}/defects", response_model=list[DefectResponse])
+def list_project_defects(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_authenticated_user),
+):
+    get_owned_project(project_id, db, current_user)
+    return (
+        db.query(models.Defect)
+        .filter(models.Defect.project_id == project_id)
+        .order_by(models.Defect.created_at.desc())
+        .all()
+    )
+
+
+@app.get("/defects/{defect_id}", response_model=DefectResponse)
+def get_defect(
+    defect_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_authenticated_user),
+):
+    return get_owned_defect(defect_id, db, current_user)
+
+
+@app.put("/defects/{defect_id}", response_model=DefectResponse)
+def update_defect(
+    defect_id: int,
+    defect_data: DefectUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_authenticated_user),
+):
+    defect = get_owned_defect(defect_id, db, current_user)
+    for field, value in defect_data.model_dump(exclude_unset=True).items():
+        setattr(defect, field, value)
+    db.commit()
+    db.refresh(defect)
+    return defect
+
+
+@app.delete("/defects/{defect_id}")
+def delete_defect(
+    defect_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_authenticated_user),
+):
+    defect = get_owned_defect(defect_id, db, current_user)
+    db.delete(defect)
+    db.commit()
+    return {"message": "Defect deleted successfully"}
+
