@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Activity, ArrowDownUp, ArrowRight, Bell, Check, CheckCircle2, ChevronDown, CircleHelp, ClipboardCheck, Clock3, FolderKanban, LayoutDashboard, ListChecks, LogOut, Menu, Plus, Search, Settings2, ShieldCheck, Sparkles, Trash2, X } from "lucide-react";
 import { api } from "./api";
+import ExecutionDefectsPage from "./ExecutionDefectsPage";
 import { useAuth } from "./AuthContext";
 
 function Brand({ compact = false }) {
@@ -170,7 +171,7 @@ function TestCasesPage() {
   }
 
   return <div className="page-content">
-    <div className="welcome-row"><div><button className="back-link" onClick={()=>navigate("/dashboard")}>← Back to projects</button><span className="eyebrow">TEST CASE MANAGEMENT</span><h1>{project?.name || "Project test cases"}</h1><p className="muted">Create and organize test scenarios for this project.</p></div><button className="btn btn-primary" onClick={openCreate} disabled={!project}><Plus size={17}/> New test case</button></div>
+    <div className="welcome-row"><div><button className="back-link" onClick={()=>navigate("/dashboard")}>← Back to projects</button><span className="eyebrow">TEST CASE MANAGEMENT</span><h1>{project?.name || "Project test cases"}</h1><p className="muted">Create and organize test scenarios for this project.</p></div><div className="welcome-actions"><Link className="btn btn-quiet" to={`/projects/${projectId}/quality`}>Test runs & defects</Link><button className="btn btn-primary" onClick={openCreate} disabled={!project}><Plus size={17}/> New test case</button></div></div>
     {error && <div className="alert page-alert">{error}</div>}
     <section className="stat-grid test-case-stats">
       <div className="stat-card"><div className="stat-top">Total test cases <span className="stat-icon violet"><ListChecks size={18}/></span></div><strong>{loading?"—":cases.length}</strong><small>Scenarios in this project</small></div>
@@ -191,6 +192,7 @@ export default function App() {
     <Route path="/register" element={<AuthPage mode="register"/>}/>
     <Route path="/dashboard" element={<Protected><AppShell><Dashboard/></AppShell></Protected>}/>
     <Route path="/projects/:projectId/test-cases" element={<Protected><AppShell><TestCasesPage/></AppShell></Protected>}/>
+    <Route path="/projects/:projectId/quality" element={<Protected><AppShell><ExecutionDefectsPage/></AppShell></Protected>}/>
     <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
     <Route path="*" element={<Navigate to="/" replace/>}/>
   </Routes>;
