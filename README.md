@@ -1,79 +1,261 @@
-# TestFlow – QA Management System
+# TestFlow — QA Management System
 
-A full-stack QA workspace for organizing software testing from planning through execution and defect tracking. Built as a learning and portfolio project with a React frontend and a FastAPI backend.
+<p align="center">
+  <strong>A practical workspace for planning, executing, and tracking software testing.</strong>
+  <br />
+  Built with React, FastAPI, and SQLAlchemy.
+</p>
 
-> Project status: core portfolio release completed and merged into `main`. The backend test suite, frontend production build and Playwright browser smoke tests passed in GitHub Actions. This is a learning/portfolio application, not a production-audited SaaS.
+<p align="center">
+  <img alt="React" src="https://img.shields.io/badge/Frontend-React%2018-61DAFB?logo=react&logoColor=20232A" />
+  <img alt="Vite" src="https://img.shields.io/badge/Build-Vite-646CFF?logo=vite&logoColor=white" />
+  <img alt="FastAPI" src="https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white" />
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" />
+  <img alt="Tests" src="https://img.shields.io/badge/Testing-pytest%20%7C%20Playwright-2EAD33" />
+</p>
 
-## Features
+---
 
-### Authentication and project workspace
-- User registration and JWT-based login.
-- Bcrypt password hashing, with upgrade support for legacy SHA-256 hashes.
-- Protected project and test-case APIs.
-- Per-user project ownership checks.
-- Project create, read, update and delete.
-- Responsive dashboard, project search and status filtering.
+## Overview
 
-### Test case management
-- Create, view, update and delete test cases.
-- Record description, preconditions, steps and expected results.
-- Priority levels: Low, Medium, High and Critical.
-- Draft and Ready states.
-- Search and priority filtering.
+**TestFlow** is a full-stack Quality Assurance (QA) Management System that brings the main stages of a software testing workflow into one place. It helps testers organize projects, prepare test cases and plans, execute test runs, record results, and track defects.
 
-### Test planning
-- Create and update test plans with objectives, scope, status and dates.
-- Select project test cases to include in a plan.
-- Validate that selected cases belong to the same project.
-- Preserve existing test run history if a plan is deleted.
+The project is designed as a hands-on QA and software engineering portfolio project. It includes a React frontend, a FastAPI backend, a relational database layer, API documentation, automated tests, and local Docker configuration.
 
-### Test execution
-- Create a test run from a test plan or all project test cases.
-- Record Passed, Failed, Blocked and Not Run outcomes.
-- Track execution environment, run status and timestamps.
-- Review execution totals and reopen or complete a run.
+> **Project status:** The core portfolio workflow is implemented. Backend integration tests and the frontend production build have passed; Playwright browser smoke tests are included in the CI workflow. TestFlow is a learning/portfolio application and has not undergone a full production security audit.
 
-### Defect tracking
-- Create, update and delete defects.
-- Record reproduction steps, expected and actual results.
-- Set severity, priority, status and assignee.
-- Link a defect to a test case and/or test run.
-- Validate linked records against project ownership.
+## Key capabilities
 
-### Reports and activity
-- Dashboard totals for projects, test cases, plans, runs and defects.
-- Execution outcome counts and defect severity breakdown.
-- Project activity history and a notification feed for plans, runs, results and defects.
+| Area | What you can do |
+|---|---|
+| Authentication | Register, log in, and access protected features using JWT authentication |
+| Project management | Create, view, edit, delete, search, and filter QA projects |
+| Test case management | Maintain test descriptions, preconditions, steps, expected results, priority, and status |
+| Test planning | Create test plans and select the project test cases included in each plan |
+| Test execution | Create test runs and record **Passed**, **Failed**, **Blocked**, or **Not Run** results |
+| Defect tracking | Record reproduction steps, expected and actual results, severity, priority, status, and related test records |
+| Dashboard | Review project, test, execution, and defect summaries |
+| Activity and notifications | Review project activity and QA workflow notifications |
 
-### Engineering quality
-- Backend API integration tests using pytest and FastAPI TestClient.
-- GitHub Actions workflow for backend tests, frontend production build and Playwright browser smoke tests.
+### Quality and developer tooling
+
+- Backend API integration tests using **pytest** and FastAPI TestClient.
+- Browser smoke tests using **Playwright**.
+- Postman collection for exercising the API workflow.
+- GitHub Actions workflow for automated quality checks.
 - Dockerfiles and Docker Compose for local demonstration.
-- Configurable database URL (SQLite locally; PostgreSQL can be configured).
-- Manual regression checklist in `docs/TESTING_CHECKLIST.md`.
+- Swagger UI and ReDoc API documentation.
+- SQLite for the default local database, with PostgreSQL configurable through `DATABASE_URL`.
 
 ## Technology stack
 
-| Layer | Tools |
+| Layer | Technology |
 |---|---|
 | Frontend | React 18, Vite, React Router, Lucide |
 | Backend | Python, FastAPI, Pydantic |
-| Database | SQLite by default, PostgreSQL supported through DATABASE_URL |
+| Database | SQLite (default), PostgreSQL (configurable) |
 | ORM | SQLAlchemy |
-| Authentication | JWT, python-jose, bcrypt via Passlib |
-| API documentation | Swagger UI and ReDoc |
-| Testing | pytest, FastAPI TestClient, httpx |
-| Browser automation | Playwright smoke tests for registration, login and protected routes |
+| Authentication | JWT, python-jose, Passlib, bcrypt |
+| API documentation | Swagger UI, ReDoc |
+| Backend testing | pytest, FastAPI TestClient, httpx |
+| Browser testing | Playwright |
+| API testing | Postman |
 | CI | GitHub Actions |
-| Containers | Docker and Docker Compose |
+| Containers | Docker, Docker Compose |
+
+## Application architecture
+
+```text
+                 ┌──────────────────────────┐
+                 │       TestFlow UI        │
+                 │      React + Vite        │
+                 └────────────┬─────────────┘
+                              │ HTTP / JSON
+                              ▼
+                 ┌──────────────────────────┐
+                 │       FastAPI API        │
+                 │ Authentication & routes │
+                 └────────────┬─────────────┘
+                              │ SQLAlchemy
+                              ▼
+                 ┌──────────────────────────┐
+                 │       Database           │
+                 │ SQLite / PostgreSQL      │
+                 └──────────────────────────┘
+```
+
+The frontend communicates with the backend through the API client in `frontend/src/api.js`. By default, API requests are sent to `http://127.0.0.1:8000`. The URL can be overridden with the frontend environment variable `VITE_API_URL`.
+
+## Getting started
+
+### Prerequisites
+
+Install the following before running TestFlow:
+
+- Python 3.10 or newer
+- Node.js 20 or newer
+- npm
+- Git
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/priyansha179/QA-Management-System.git
+cd QA-Management-System
+```
+
+### 2. Set up and run the backend
+
+Create a virtual environment from the repository root.
+
+**Windows PowerShell**
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+cd backend
+python -m pip install -r requirements.txt
+$env:JWT_SECRET_KEY = "replace-with-a-long-random-secret"
+python -m uvicorn main:app --reload
+```
+
+**macOS / Linux**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+cd backend
+python -m pip install -r requirements.txt
+export JWT_SECRET_KEY="replace-with-a-long-random-secret"
+python -m uvicorn main:app --reload
+```
+
+Keep this terminal running. The backend is available at:
+
+| Resource | URL |
+|---|---|
+| API base URL | http://127.0.0.1:8000 |
+| Swagger UI | http://127.0.0.1:8000/docs |
+| ReDoc | http://127.0.0.1:8000/redoc |
+| Health check | http://127.0.0.1:8000/health |
+
+The default local database is `backend/qa_system.db`. To use PostgreSQL, configure `DATABASE_URL` with a valid connection string, for example:
+
+```text
+postgresql+psycopg2://username:password@localhost:5432/qa_management
+```
+
+### 3. Set up and run the frontend
+
+Open a **second terminal** at the repository root:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Vite prints the local frontend URL in the terminal. Usually it is:
+
+- http://localhost:5173
+
+If port 5173 is already occupied, Vite automatically selects another available port (for example, 5174). Open the exact URL printed by Vite.
+
+The frontend defaults to the backend URL `http://127.0.0.1:8000`. To change it, create `frontend/.env`:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+**Keep both backend and frontend terminals running** while using the application.
+
+### 4. Run backend tests
+
+From the repository root:
+
+```bash
+cd backend
+python -m pytest tests -v
+```
+
+### 5. Build the frontend
+
+From the repository root:
+
+```bash
+cd frontend
+npm run build
+```
+
+### 6. Run Playwright browser tests
+
+From the frontend directory, install the required browser once:
+
+```bash
+npx playwright install
+npm run test:e2e
+```
+
+### 7. Run with Docker
+
+Docker Compose is also available for a local demonstration:
+
+```bash
+cp .env.example .env
+```
+
+Set a unique `JWT_SECRET_KEY` in `.env`, then run:
+
+```bash
+docker compose up --build
+```
+
+Open the frontend at http://localhost:8080 and the API documentation at http://localhost:8000/docs.
+
+For more details, see [Docker instructions](docs/DOCKER.md).
+
+## API reference
+
+The API is documented interactively through Swagger UI at `/docs`. The main endpoints are summarized below.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/health` | Check API health |
+| POST | `/register` | Register a user |
+| POST | `/login` | Authenticate and receive a JWT |
+| GET, POST | `/projects` | List and create projects |
+| GET, PUT, DELETE | `/projects/{project_id}` | Retrieve, update, or delete a project |
+| GET, POST | `/projects/{project_id}/test-cases` | List and create test cases |
+| GET, PUT, DELETE | `/test-cases/{test_case_id}` | Retrieve, update, or delete a test case |
+| GET | `/dashboard/summary` | Retrieve dashboard metrics |
+| GET, POST | `/projects/{project_id}/test-plans` | List and create test plans |
+| PUT, DELETE | `/test-plans/{plan_id}` | Update or delete a test plan |
+| GET, POST | `/projects/{project_id}/test-runs` | List and create test runs |
+| GET, PATCH | `/test-runs/{run_id}` | Retrieve a run or update its status |
+| POST | `/test-runs/{run_id}/results` | Record a test execution result |
+| GET, POST | `/projects/{project_id}/defects` | List and create defects |
+| PUT, DELETE | `/defects/{defect_id}` | Update or delete a defect |
+| GET | `/projects/{project_id}/activity` | Retrieve project activity |
+| GET | `/notifications` | Retrieve the current user's notifications |
+
+All endpoints other than health, registration, and login require a bearer token:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+Use Swagger UI to inspect request schemas and try endpoints interactively. You can also import the Postman collection at `postman/TestFlow-QA-Management-System.postman_collection.json` and configure its collection variables.
 
 ## Repository structure
 
 ```text
 QA-Management-System/
-├── .github/workflows/quality.yml
+├── .github/
+│   └── workflows/
+│       └── quality.yml
 ├── backend/
-│   ├── tests/test_workflow.py
+│   ├── tests/
+│   │   └── test_workflow.py
 │   ├── auth.py
 │   ├── database.py
 │   ├── main.py
@@ -91,175 +273,63 @@ QA-Management-System/
 │   │   ├── WorkflowPage.jsx
 │   │   ├── api.js
 │   │   └── styles.css
+│   ├── e2e/
 │   ├── Dockerfile
 │   └── nginx.conf
+├── postman/
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
 ```
 
-## Run locally
+## Security notes
 
-### Prerequisites
-- Python 3.10+
-- Node.js 20+
-- npm
-- Git
+- Protected project workflows enforce per-user project ownership checks.
+- Public registration assigns the default Tester role; users cannot self-assign elevated roles.
+- New passwords use bcrypt; legacy SHA-256 hashes are upgraded after successful login.
+- Use a strong, unique `JWT_SECRET_KEY` outside local development.
+- Restrict `FRONTEND_ORIGINS` to the frontend origins you trust.
+- Do not commit secrets, access tokens, or real database credentials.
+- Before public production deployment, add HTTPS, managed database backups, migrations, rate limiting, and a full security review.
 
-### 1. Clone the repository
+TestFlow is a portfolio and learning project, not a production-audited SaaS application.
 
-```bash
-git clone https://github.com/priyansha179/QA-Management-System.git
-cd QA-Management-System
-```
+## Suggested QA demonstration
 
-### 2. Configure the backend
+A useful end-to-end portfolio walkthrough:
 
-From the repository root:
+1. Register a TestFlow account and log in.
+2. Create a project named **E-Commerce Website Testing**.
+3. Add test cases for login, product search, cart, and checkout.
+4. Create a smoke or regression test plan and select test cases.
+5. Start a test run and record passed, failed, and blocked results.
+6. Create a defect for a failed test and include clear reproduction steps.
+7. Review dashboard metrics, project activity, and notifications.
+8. Run the backend tests, frontend build, and Playwright browser checks.
 
-**Windows PowerShell**
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-cd backend
-python -m pip install -r requirements.txt
-$env:JWT_SECRET_KEY = "replace-with-a-long-random-secret"
-uvicorn main:app --reload
-```
+Use [the manual testing checklist](docs/TESTING_CHECKLIST.md) as a companion during the walkthrough.
 
-**macOS / Linux**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-cd backend
-python -m pip install -r requirements.txt
-export JWT_SECRET_KEY="replace-with-a-long-random-secret"
-uvicorn main:app --reload
-```
+## Roadmap
 
-Backend URLs:
-- API: http://127.0.0.1:8000
-- Swagger UI: http://127.0.0.1:8000/docs
-- ReDoc: http://127.0.0.1:8000/redoc
-- Health check: http://127.0.0.1:8000/health
+The core QA workflow is implemented. The following are possible future enhancements:
 
-The default database is `backend/qa_system.db`. Set `DATABASE_URL` to use PostgreSQL, for example `postgresql+psycopg2://user:password@localhost:5432/qa_management`. Never commit credentials or a real JWT secret.
+- [ ] Team invitations, shared project membership, and granular role permissions
+- [ ] Evidence and file attachments for defects
+- [ ] Email notifications and configurable notification preferences
+- [ ] Production deployment with managed PostgreSQL, HTTPS, and backups
+- [ ] Database migrations and additional production security hardening
 
-### 3. Run the frontend
+---
 
-Open a second terminal from the repository root:
+## Author
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+**Priyansha**  
+Computer Engineering | QA & Software Testing
 
-Open http://localhost:5173. The frontend defaults to the local API at http://127.0.0.1:8000. To change it, create `frontend/.env` with:
+If you find TestFlow useful or have suggestions, feel free to open an issue or submit a pull request.
 
-```env
-VITE_API_URL=http://127.0.0.1:8000
-```
+---
 
-Build the production frontend:
-
-```bash
-npm run build
-```
-
-### 4. Run backend tests
-
-From the repository root:
-
-```bash
-cd backend
-pytest -q
-```
-
-The tests cover authentication, protected routes, a full plan-to-run-to-defect workflow, dashboard aggregation, activity/notification records and cross-user project isolation.
-
-### 5. Run with Docker
-
-See [docs/DOCKER.md](docs/DOCKER.md). In short:
-
-```bash
-cp .env.example .env
-# Edit .env and set a unique JWT_SECRET_KEY
-docker compose up --build
-```
-
-Open the frontend at http://localhost:8080 and API documentation at http://localhost:8000/docs.
-
-## API overview
-
-All endpoints except health, registration and login require `Authorization: Bearer <token>`.
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/health` | API health |
-| POST | `/register` | Register user |
-| POST | `/login` | Get JWT |
-| GET/POST | `/projects` | List/create projects |
-| GET/PUT/DELETE | `/projects/{project_id}` | Read/update/delete project |
-| GET/POST | `/projects/{project_id}/test-cases` | List/create test cases |
-| GET/PUT/DELETE | `/test-cases/{test_case_id}` | Read/update/delete test case |
-| GET | `/dashboard/summary` | Workspace metrics |
-| GET/POST | `/projects/{project_id}/test-plans` | List/create test plans |
-| PUT/DELETE | `/test-plans/{plan_id}` | Update/delete test plan |
-| GET/POST | `/projects/{project_id}/test-runs` | List/create test runs |
-| GET/PATCH | `/test-runs/{run_id}` | Read/update run status |
-| POST | `/test-runs/{run_id}/results` | Record a test result |
-| GET/POST | `/projects/{project_id}/defects` | List/create defects |
-| PUT/DELETE | `/defects/{defect_id}` | Update/delete defect |
-| GET | `/projects/{project_id}/activity` | Project audit activity |
-| GET | `/notifications` | Current user's QA activity notifications |
-
-Open Swagger UI to inspect request schemas and try the APIs interactively.
-
-## Security and deployment notes
-
-- Project, test-plan, test-run and defect operations check the authenticated user's project ownership.
-- Public registration always assigns the default Tester role; users cannot self-assign elevated roles.
-- New passwords use bcrypt. Existing SHA-256 password hashes are verified and upgraded after successful login.
-- Set a strong, unique `JWT_SECRET_KEY` in every non-local environment.
-- Restrict `FRONTEND_ORIGINS` to the exact frontend origins you control.
-- Use HTTPS, a managed PostgreSQL database, secret management, backups and a proper migration tool before production deployment.
-- The current app is a portfolio/learning implementation, not a security-audited production SaaS. Review the OWASP API Security Top 10 and perform additional authorization, rate-limit, upload and deployment reviews before exposing it publicly.
-
-## Learning and QA portfolio
-
-Recommended demonstration:
-1. Create an account and a project called "E-Commerce Website Testing".
-2. Add login, product search, cart and checkout test cases.
-3. Group the cases into a smoke or regression test plan.
-4. Create a test run and record both passing and failing outcomes.
-5. File a defect from a failed test, including reproducible steps.
-6. Review the dashboard and activity history.
-7. Run the automated tests and include screenshots plus a test summary in your portfolio.
-
-Use `docs/TESTING_CHECKLIST.md` as the manual regression checklist. Import `postman/TestFlow-QA-Management-System.postman_collection.json` into Postman, set its collection variables, then run the requests in order for an API workflow smoke test. Browser smoke tests are in `frontend/e2e/auth.spec.js` and run with `npm run test:e2e`.
-
-## Release status
-
-The core portfolio workflow is implemented and tested. The GitHub Actions workflow runs backend integration tests, builds the frontend and executes Playwright browser smoke tests.
-
-### Optional production enhancements
-
-These items are intentionally outside the core portfolio release and should be completed before using the application as a shared, internet-facing production service.
-
-- [x] Authentication and per-user project isolation.
-- [x] Project and test-case CRUD.
-- [x] Test plan management and test-case selection.
-- [x] Test run creation and result recording.
-- [x] Defect tracking with severity, priority and status.
-- [x] Dashboard metrics, project activity history and notifications.
-- [x] Backend integration tests and GitHub Actions workflow.
-- [x] Docker-based local deployment configuration.
-- [x] Postman API regression collection and Playwright browser smoke checks.
-- [x] Browser smoke automation with Playwright (login, registration and protected-route checks).
-- [ ] Team invitations, shared project membership and granular role permissions.
-- [ ] File attachments for defect evidence.
-- [ ] Email notifications and configurable notification preferences.
-- [ ] Cloud deployment with managed PostgreSQL, HTTPS and backups.
-- [ ] Production security review and database migrations.
-
+<p align="center">
+  <strong>TestFlow — Plan smarter. Test better. Track every defect.</strong>
+</p>
