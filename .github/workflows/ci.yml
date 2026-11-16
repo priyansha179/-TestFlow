@@ -1,0 +1,40 @@
+name: Project CI
+
+on:
+  push:
+    branches: ["main", "feature/**"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  backend:
+    name: Backend syntax and import check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend dependencies
+        run: python -m pip install -r backend/requirements.txt
+      - name: Compile backend
+        run: python -m compileall -q backend
+      - name: Import API and verify routes
+        working-directory: backend
+        run: |
+          python -c "import main; paths = {route.path for route in main.app.routes}; required = {'/health', '/test-cases/{test_case_id}/executions', '/projects/{project_id}/defects', '/defects/{defect_id}'}; missing = required - paths; assert not missing, f'Missing API routes: {missing}'; print('Backend import and QA routes OK')"
+
+  frontend:
+    name: Frontend production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
