@@ -13,6 +13,10 @@ A full-stack QA Management System currently under development. The backend provi
 - Create, list, view, update, and delete test cases within each owned project.
 - Test cases include preconditions, steps, expected results, priority, and Draft/Ready status.
 - Test case access is restricted to the owner of the parent project.
+- Record Pass, Fail, and Blocked test executions with actual results, notes, tester, and timestamp.
+- View execution history by test case or project.
+- Create, view, update, and delete defects with severity, priority, status, reproduction steps, and optional links to failed executions.
+- Defect and execution access is scoped through the authenticated project owner.
 - SQLite database with SQLAlchemy ORM.
 - Safe startup migration for the older projects table; existing records are preserved.
 - Interactive API documentation through Swagger UI and ReDoc.
@@ -147,6 +151,8 @@ The React frontend is built with Vite and React Router. It currently includes:
 - Project dashboard with total, active, and completed project counts.
 - Project listing, search, and status filtering.
 - Project-specific test case management screens.
+- Test execution form with Pass/Fail/Blocked results and execution history.
+- Defect register with severity, priority, status updates, and failed-execution linking.
 - Create, edit, view, search, filter, and delete test cases.
 - Test case priorities (Low, Medium, High, Critical) and Draft/Ready status.
 - Create, edit, and delete project actions.
@@ -193,7 +199,15 @@ npm run build
 | GET | `/projects/{project_id}/test-cases` | Yes | List test cases in a project |
 | GET | `/test-cases/{test_case_id}` | Yes | Get one test case |
 | PUT | `/test-cases/{test_case_id}` | Yes | Update a test case |
-| DELETE | `/test-cases/{test_case_id}` | Yes | Delete a test case |
+| DELETE | `/test-cases/{test_case_id}` | Yes | Delete a test case and its execution history (linked defects are retained without the execution link) |
+| POST | `/test-cases/{test_case_id}/executions` | Yes | Record a Pass, Fail, or Blocked execution |
+| GET | `/test-cases/{test_case_id}/executions` | Yes | List execution history for a test case |
+| GET | `/projects/{project_id}/executions` | Yes | List execution history for a project |
+| POST | `/projects/{project_id}/defects` | Yes | Create a defect; optional execution link must reference a failed run in the project |
+| GET | `/projects/{project_id}/defects` | Yes | List project defects |
+| GET | `/defects/{defect_id}` | Yes | Get one defect |
+| PUT | `/defects/{defect_id}` | Yes | Update defect details or status |
+| DELETE | `/defects/{defect_id}` | Yes | Delete a defect |
 
 ### Register
 
@@ -264,6 +278,37 @@ Send only the fields you want to change:
 }
 ```
 
+### Record a test execution
+
+`POST /test-cases/{test_case_id}/executions`
+
+```json
+{
+  "status": "Fail",
+  "actual_result": "The page displayed an unexpected error after submitting the form.",
+  "notes": "Chrome, Windows 11"
+}
+```
+
+Allowed results: `Pass`, `Fail`, and `Blocked`. Execution history is available from the test-case endpoint or the project executions endpoint.
+
+### Report a defect
+
+`POST /projects/{project_id}/defects`
+
+```json
+{
+  "title": "Submit button does not show validation message",
+  "description": "The form stays on the same page without explaining the invalid input.",
+  "steps_to_reproduce": "1. Open the form.\n2. Leave the required field empty.\n3. Click Submit.",
+  "severity": "Medium",
+  "priority": "High",
+  "test_execution_id": 12
+}
+```
+
+Severity and priority values: `Low`, `Medium`, `High`, `Critical`. Defect status values: `Open`, `In Progress`, `Resolved`, `Closed`. When a test execution is supplied, it must belong to the same project and have a `Fail` result.
+
 ### Project access
 
 Users can view, update, or delete only projects they own. Requests for projects owned by another user return `404 Not Found`.
@@ -288,10 +333,11 @@ Users can view, update, or delete only projects they own. Requests for projects 
 - [x] Startup migration for existing project databases.
 - [ ] Team and project member management.
 - [x] Test case management CRUD and project ownership checks.
-- [ ] Test execution and result tracking.
-- [ ] Bug and defect tracking.
+- [x] Test execution and result tracking.
+- [x] Bug and defect tracking.
 - [x] React frontend foundation with authentication and project management dashboard.
-- [ ] Automated API and end-to-end tests.
+- [x] Automated CI checks for backend imports and frontend production builds.
+- [ ] Dedicated automated API and end-to-end test coverage.
 - [ ] Deployment.
 
 
