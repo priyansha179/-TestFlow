@@ -1,81 +1,110 @@
-# QA Management System
+# TestFlow – QA Management System
 
-A full-stack QA Management System currently under development. The backend provides authentication and project management APIs for organizing QA work. Planned modules include test cases, test execution, and defect tracking.
+A full-stack QA workspace for organizing software testing from planning through execution and defect tracking. Built as a learning and portfolio project with a React frontend and a FastAPI backend.
 
-## Current Backend Features
+> Project status: active development. The core QA workflow is implemented on the `feature/complete-qa-workflow` branch. Automated checks are included; review the GitHub Actions result before treating a change as verified.
 
-- User registration and login.
-- JWT bearer-token authentication.
-- Bcrypt password hashing for new accounts.
-- Automatic upgrade of existing SHA-256 password hashes to bcrypt after a successful login.
-- Create, list, view, update, and delete projects.
-- Project data is scoped to the authenticated owner.
-- Create, list, view, update, and delete test cases within each owned project.
-- Test cases include preconditions, steps, expected results, priority, and Draft/Ready status.
-- Test case access is restricted to the owner of the parent project.
-- SQLite database with SQLAlchemy ORM.
-- Safe startup migration for the older projects table; existing records are preserved.
-- Interactive API documentation through Swagger UI and ReDoc.
+## Features
 
-## Why GitHub Shows JavaScript
+### Authentication and project workspace
+- User registration and JWT-based login.
+- Bcrypt password hashing, with upgrade support for legacy SHA-256 hashes.
+- Protected project and test-case APIs.
+- Per-user project ownership checks.
+- Project create, read, update and delete.
+- Responsive dashboard, project search and status filtering.
 
-This is a **full-stack project**, so it uses more than one programming language:
+### Test case management
+- Create, view, update and delete test cases.
+- Record description, preconditions, steps and expected results.
+- Priority levels: Low, Medium, High and Critical.
+- Draft and Ready states.
+- Search and priority filtering.
 
-- **Python** powers the backend: FastAPI, authentication, database models, and REST API endpoints are implemented in Python inside `backend/`.
-- **JavaScript** powers the frontend: the browser interface is built with React and Vite inside `frontend/`. React components use the `.jsx` extension, while frontend configuration and API helper files use `.js`.
+### Test planning
+- Create and update test plans with objectives, scope, status and dates.
+- Select project test cases to include in a plan.
+- Validate that selected cases belong to the same project.
+- Preserve existing test run history if a plan is deleted.
 
-GitHub's language summary detects languages from files across the entire repository. It may therefore show JavaScript even though the backend is written in Python. This is expected and is not, by itself, a project error. The two parts communicate through HTTP API requests.
+### Test execution
+- Create a test run from a test plan or all project test cases.
+- Record Passed, Failed, Blocked and Not Run outcomes.
+- Track execution environment, run status and timestamps.
+- Review execution totals and reopen or complete a run.
 
-## Technology Stack
+### Defect tracking
+- Create, update and delete defects.
+- Record reproduction steps, expected and actual results.
+- Set severity, priority, status and assignee.
+- Link a defect to a test case and/or test run.
+- Validate linked records against project ownership.
 
-| Category | Technology |
+### Reports and activity
+- Dashboard totals for projects, test cases, plans, runs and defects.
+- Execution outcome counts and defect severity breakdown.
+- Project activity history and a notification feed for plans, runs, results and defects.
+
+### Engineering quality
+- Backend API integration tests using pytest and FastAPI TestClient.
+- GitHub Actions workflow for backend tests, frontend production build and Playwright browser smoke tests.
+- Dockerfiles and Docker Compose for local demonstration.
+- Configurable database URL (SQLite locally; PostgreSQL can be configured).
+- Manual regression checklist in `docs/TESTING_CHECKLIST.md`.
+
+## Technology stack
+
+| Layer | Tools |
 |---|---|
-| Backend language | Python 3 |
-| Frontend language | JavaScript (ES modules / JSX) |
-| Backend | FastAPI |
-| Database | SQLite |
+| Frontend | React 18, Vite, React Router, Lucide |
+| Backend | Python, FastAPI, Pydantic |
+| Database | SQLite by default, PostgreSQL supported through DATABASE_URL |
 | ORM | SQLAlchemy |
-| Authentication | JWT (python-jose) |
-| Password hashing | Passlib and bcrypt |
-| API server | Uvicorn |
-| API documentation | Swagger UI / ReDoc |
+| Authentication | JWT, python-jose, bcrypt via Passlib |
+| API documentation | Swagger UI and ReDoc |
+| Testing | pytest, FastAPI TestClient, httpx |
+| Browser automation | Playwright smoke tests for registration, login and protected routes |
+| CI | GitHub Actions |
+| Containers | Docker and Docker Compose |
 
-## Project Structure
+## Repository structure
 
 ```text
 QA-Management-System/
+├── .github/workflows/quality.yml
 ├── backend/
+│   ├── tests/test_workflow.py
 │   ├── auth.py
 │   ├── database.py
 │   ├── main.py
 │   ├── models.py
-│   └── requirements.txt
-├── .gitignore
+│   ├── qa_modules.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── docs/
+│   ├── DOCKER.md
+│   └── TESTING_CHECKLIST.md
 ├── frontend/
 │   ├── src/
 │   │   ├── App.jsx
 │   │   ├── AuthContext.jsx
+│   │   ├── WorkflowPage.jsx
 │   │   ├── api.js
-│   │   ├── main.jsx
 │   │   └── styles.css
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── .env.example
-│   └── .gitignore
-├── .gitignore
+│   ├── Dockerfile
+│   └── nginx.conf
+├── docker-compose.yml
+├── .env.example
 └── README.md
 ```
 
-The SQLite database file is created in the backend directory when the application runs. It is intentionally excluded from Git because it contains local application data.
-
-## Getting Started
+## Run locally
 
 ### Prerequisites
-
-- Python 3.10 or newer
+- Python 3.10+
+- Node.js 20+
+- npm
 - Git
-- VS Code or another code editor
 
 ### 1. Clone the repository
 
@@ -84,7 +113,7 @@ git clone https://github.com/priyansha179/QA-Management-System.git
 cd QA-Management-System
 ```
 
-### 2. Create and activate a virtual environment
+### 2. Configure the backend
 
 From the repository root:
 
@@ -92,206 +121,139 @@ From the repository root:
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
-```
-
-**macOS / Linux**
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install backend dependencies
-
-```bash
 cd backend
 python -m pip install -r requirements.txt
-```
-
-### 4. Configure the JWT secret
-
-**Windows PowerShell**
-```powershell
-$env:JWT_SECRET_KEY = "replace-this-with-a-long-random-secret"
-```
-
-**macOS / Linux**
-```bash
-export JWT_SECRET_KEY="replace-this-with-a-long-random-secret"
-```
-
-The application includes a development-only fallback secret so it can start locally, but you should set your own secret. Never commit a real secret to GitHub or use the development fallback in production.
-
-### 5. Start the backend
-
-Run this from inside the `backend` directory:
-
-```bash
+$env:JWT_SECRET_KEY = "replace-with-a-long-random-secret"
 uvicorn main:app --reload
 ```
 
-The API will be available at:
+**macOS / Linux**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+cd backend
+python -m pip install -r requirements.txt
+export JWT_SECRET_KEY="replace-with-a-long-random-secret"
+uvicorn main:app --reload
+```
 
+Backend URLs:
 - API: http://127.0.0.1:8000
 - Swagger UI: http://127.0.0.1:8000/docs
 - ReDoc: http://127.0.0.1:8000/redoc
+- Health check: http://127.0.0.1:8000/health
 
-On startup, the backend creates missing tables and adds the `owner_id` and `created_at` columns to an older `projects` table when needed. Existing user and project rows are retained. Projects created before ownership was introduced remain unassigned and are not returned in users' project lists.
+The default database is `backend/qa_system.db`. Set `DATABASE_URL` to use PostgreSQL, for example `postgresql+psycopg2://user:password@localhost:5432/qa_management`. Never commit credentials or a real JWT secret.
 
-## Frontend
-
-The React frontend is built with Vite and React Router. It currently includes:
-
-- Registration and login screens connected to the backend API.
-- JWT session storage and protected dashboard access.
-- Responsive QA workspace layout.
-- Project dashboard with total, active, and completed project counts.
-- Project listing, search, and status filtering.
-- Project-specific test case management screens.
-- Create, edit, view, search, filter, and delete test cases.
-- Test case priorities (Low, Medium, High, Critical) and Draft/Ready status.
-- Create, edit, and delete project actions.
-- Loading, empty, and API error states.
-
-### Run the frontend
+### 3. Run the frontend
 
 Open a second terminal from the repository root:
 
 ```bash
 cd frontend
 npm install
-```
-
-Copy `.env.example` to `.env` if your backend is running at a different address, then set `VITE_API_URL` to the backend base URL. The default is `http://127.0.0.1:8000`.
-
-Start the Vite development server:
-
-```bash
 npm run dev
 ```
 
-Open http://localhost:5173 in your browser. Keep the FastAPI server running in the first terminal. The backend allows the default Vite development origins; set `FRONTEND_ORIGINS` to a comma-separated list of allowed origins when hosting the frontend elsewhere.
+Open http://localhost:5173. The frontend defaults to the local API at http://127.0.0.1:8000. To change it, create `frontend/.env` with:
 
-Create a production build with:
+```env
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+Build the production frontend:
 
 ```bash
 npm run build
 ```
 
-## API Endpoints
+### 4. Run backend tests
 
-| Method | Endpoint | Auth required | Description |
-|---|---|---:|---|
-| GET | `/health` | No | Check API status |
-| POST | `/register` | No | Create a user account |
-| POST | `/login` | No | Receive a JWT access token |
-| POST | `/projects` | Yes | Create a project |
-| GET | `/projects` | Yes | List your projects |
-| GET | `/projects/{project_id}` | Yes | Get one of your projects |
-| PUT | `/projects/{project_id}` | Yes | Update one of your projects |
-| DELETE | `/projects/{project_id}` | Yes | Delete one of your projects and its test cases |
-| POST | `/projects/{project_id}/test-cases` | Yes | Create a test case in a project |
-| GET | `/projects/{project_id}/test-cases` | Yes | List test cases in a project |
-| GET | `/test-cases/{test_case_id}` | Yes | Get one test case |
-| PUT | `/test-cases/{test_case_id}` | Yes | Update a test case |
-| DELETE | `/test-cases/{test_case_id}` | Yes | Delete a test case |
+From the repository root:
 
-### Register
-
-`POST /register`
-
-Request JSON:
-```json
-{
-  "email": "tester@example.com",
-  "password": "your-password"
-}
+```bash
+cd backend
+pytest -q
 ```
 
-Passwords must be at least 8 characters. New accounts receive the `Tester` role by default; the public registration endpoint does not allow users to assign themselves privileged roles.
+The tests cover authentication, protected routes, a full plan-to-run-to-defect workflow, dashboard aggregation, activity/notification records and cross-user project isolation.
 
-### Login
+### 5. Run with Docker
 
-`POST /login`
+See [docs/DOCKER.md](docs/DOCKER.md). In short:
 
-Request JSON:
-```json
-{
-  "email": "tester@example.com",
-  "password": "your-password"
-}
+```bash
+cp .env.example .env
+# Edit .env and set a unique JWT_SECRET_KEY
+docker compose up --build
 ```
 
-Successful response:
-```json
-{
-  "access_token": "<your-jwt-access-token>",
-  "token_type": "bearer",
-  "role": "Tester"
-}
-```
+Open the frontend at http://localhost:8080 and API documentation at http://localhost:8000/docs.
 
-The token expires after 30 minutes. For protected endpoints, send:
+## API overview
 
-```http
-Authorization: Bearer <your-jwt-access-token>
-```
+All endpoints except health, registration and login require `Authorization: Bearer <token>`.
 
-In Swagger UI, click **Authorize** and enter the token. If the UI asks for the scheme, use `Bearer` followed by the token.
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health` | API health |
+| POST | `/register` | Register user |
+| POST | `/login` | Get JWT |
+| GET/POST | `/projects` | List/create projects |
+| GET/PUT/DELETE | `/projects/{project_id}` | Read/update/delete project |
+| GET/POST | `/projects/{project_id}/test-cases` | List/create test cases |
+| GET/PUT/DELETE | `/test-cases/{test_case_id}` | Read/update/delete test case |
+| GET | `/dashboard/summary` | Workspace metrics |
+| GET/POST | `/projects/{project_id}/test-plans` | List/create test plans |
+| PUT/DELETE | `/test-plans/{plan_id}` | Update/delete test plan |
+| GET/POST | `/projects/{project_id}/test-runs` | List/create test runs |
+| GET/PATCH | `/test-runs/{run_id}` | Read/update run status |
+| POST | `/test-runs/{run_id}/results` | Record a test result |
+| GET/POST | `/projects/{project_id}/defects` | List/create defects |
+| PUT/DELETE | `/defects/{defect_id}` | Update/delete defect |
+| GET | `/projects/{project_id}/activity` | Project audit activity |
+| GET | `/notifications` | Current user's QA activity notifications |
 
-### Create a project
+Open Swagger UI to inspect request schemas and try the APIs interactively.
 
-`POST /projects`
+## Security and deployment notes
 
-```json
-{
-  "name": "E-Commerce Website Testing",
-  "description": "Manage test activities for the e-commerce application.",
-  "status": "Active"
-}
-```
+- Project, test-plan, test-run and defect operations check the authenticated user's project ownership.
+- Public registration always assigns the default Tester role; users cannot self-assign elevated roles.
+- New passwords use bcrypt. Existing SHA-256 password hashes are verified and upgraded after successful login.
+- Set a strong, unique `JWT_SECRET_KEY` in every non-local environment.
+- Restrict `FRONTEND_ORIGINS` to the exact frontend origins you control.
+- Use HTTPS, a managed PostgreSQL database, secret management, backups and a proper migration tool before production deployment.
+- The current app is a portfolio/learning implementation, not a security-audited production SaaS. Review the OWASP API Security Top 10 and perform additional authorization, rate-limit, upload and deployment reviews before exposing it publicly.
 
-Allowed statuses: `Active`, `Completed`, and `On Hold`.
+## Learning and QA portfolio
 
-### Update a project
+Recommended demonstration:
+1. Create an account and a project called "E-Commerce Website Testing".
+2. Add login, product search, cart and checkout test cases.
+3. Group the cases into a smoke or regression test plan.
+4. Create a test run and record both passing and failing outcomes.
+5. File a defect from a failed test, including reproducible steps.
+6. Review the dashboard and activity history.
+7. Run the automated tests and include screenshots plus a test summary in your portfolio.
 
-`PUT /projects/{project_id}`
-
-Send only the fields you want to change:
-
-```json
-{
-  "status": "Completed"
-}
-```
-
-### Project access
-
-Users can view, update, or delete only projects they own. Requests for projects owned by another user return `404 Not Found`.
-
-## Security Notes
-
-- Protected project routes require a valid JWT bearer token.
-- New passwords are hashed with bcrypt.
-- Legacy SHA-256 password hashes are supported for login and upgraded after successful authentication.
-- The JWT secret must be configured securely before deployment.
-- This is a learning project and needs further security review and automated testing before production use.
+Use `docs/TESTING_CHECKLIST.md` as the manual regression checklist. Import `postman/TestFlow-QA-Management-System.postman_collection.json` into Postman, set its collection variables, then run the requests in order for an API workflow smoke test. Browser smoke tests are in `frontend/e2e/auth.spec.js` and run with `npm run test:e2e`.
 
 ## Roadmap
 
-- [x] FastAPI backend setup.
-- [x] SQLite database integration.
-- [x] User registration and login.
-- [x] JWT authentication.
-- [x] Bcrypt password hashing and legacy hash upgrade.
-- [x] Project create, read, update, and delete APIs.
-- [x] Ownership checks for project access.
-- [x] Startup migration for existing project databases.
-- [ ] Team and project member management.
-- [x] Test case management CRUD and project ownership checks.
-- [ ] Test execution and result tracking.
-- [ ] Bug and defect tracking.
-- [x] React frontend foundation with authentication and project management dashboard.
-- [ ] Automated API and end-to-end tests.
-- [ ] Deployment.
-
+- [x] Authentication and per-user project isolation.
+- [x] Project and test-case CRUD.
+- [x] Test plan management and test-case selection.
+- [x] Test run creation and result recording.
+- [x] Defect tracking with severity, priority and status.
+- [x] Dashboard metrics, project activity history and notifications.
+- [x] Backend integration tests and GitHub Actions workflow.
+- [x] Docker-based local deployment configuration.
+- [x] Postman API regression collection and Playwright browser smoke checks.
+- [x] Browser smoke automation with Playwright (login, registration and protected-route checks).
+- [ ] Team invitations, shared project membership and granular role permissions.
+- [ ] File attachments for defect evidence.
+- [ ] Email notifications and configurable notification preferences.
+- [ ] Cloud deployment with managed PostgreSQL, HTTPS and backups.
+- [ ] Production security review and database migrations.
 
