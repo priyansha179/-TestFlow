@@ -61,10 +61,12 @@ def qa_client():
 
     project_id = project.id
     test_case_id = test_case.id
+    user_id = user.id
     db.close()
 
+    authenticated_user = models.User(id=user_id, email="qa-test@example.com", hashed_password="test-hash")
     main.app.dependency_overrides[main.get_db] = override_get_db
-    main.app.dependency_overrides[main.get_authenticated_user] = lambda: user
+    main.app.dependency_overrides[main.get_authenticated_user] = lambda: authenticated_user
 
     with TestClient(main.app) as client:
         yield client, project_id, test_case_id
