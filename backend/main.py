@@ -346,9 +346,18 @@ def delete_project(
             detail="Project not found",
         )
 
-    db.query(models.TestCase).filter(
-        models.TestCase.project_id == project.id
-    ).delete(synchronize_session=False)
+    # Remove dependent QA records in child-to-parent order to avoid orphaned data.
+    run_ids = [row.id for row in db.query(models.TestRun.id).filter(models.TestRun.project_id == project.id).all()]
+    plan_ids = [row.id for row in db.query(models.TestPlan.id).filter(models.TestPlan.project_id == project.id).all()]
+    db.query(models.AuditLog).filter(models.AuditLog.project_id == project.id).delete(synchronize_session=False)
+    db.query(models.Defect).filter(models.Defect.project_id == project.id).delete(synchronize_session=False)
+    if run_ids:
+        db.query(models.TestResult).filter(models.TestResult.run_id.in_(run_ids)).delete(synchronize_session=False)
+    db.query(models.TestRun).filter(models.TestRun.project_id == project.id).delete(synchronize_session=False)
+    if plan_ids:
+        db.query(models.TestPlanCase).filter(models.TestPlanCase.plan_id.in_(plan_ids)).delete(synchronize_session=False)
+    db.query(models.TestPlan).filter(models.TestPlan.project_id == project.id).delete(synchronize_session=False)
+    db.query(models.TestCase).filter(models.TestCase.project_id == project.id).delete(synchronize_session=False)
     db.delete(project)
     db.commit()
     return {"message": "Project deleted successfully"}
@@ -473,3 +482,8 @@ def delete_test_case(
     db.delete(test_case)
     db.commit()
     return {"message": "Test case deleted successfully"}
+
+
+# Extended QA workflow modules: plans, execution, defects, reports and audit history.
+from qa_modules import router as qa_router
+app.include_router(qa_router)
